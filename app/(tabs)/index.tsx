@@ -7,14 +7,18 @@ import { Linking } from 'react-native';
 import { Link } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { Ref } from 'react';
-import { opacity } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
 import Stats  from '../../components/stats';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 export default function entriesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [search, saveSearchText] = useState('');
-  const show = () => setModalVisible(true);
-  const hide = () => setModalVisible(false);
+  const show = async () => setModalVisible(true);
+  const hide = async () => setModalVisible(false);
+
+  const [customRangePickerModelVisible, setCRMVisible] = useState(false);
+  const closeCRModel = async () => setCRMVisible(false);
+  const openCRModel = async () => setCRMVisible(true);
 
   function changeTextHandler(text: string) {
     saveSearchText(text);
@@ -55,22 +59,43 @@ export default function entriesScreen() {
         <SafeAreaView style={[modalStyles.container, modalStyles.background]}>
         <Text style={[modalStyles.title, modalStyles.white]}>Select a time range</Text>
         <View style={modalStyles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-        <Pressable style={modalStyles.button}>
+        <Pressable style={modalStyles.button} onPress={() => {hide()}}>
           <Text style={modalStyles.white}> This Week</Text>
         </Pressable>
-        <Pressable style={modalStyles.button}>
+        <Pressable style={modalStyles.button} onPress={() => {hide()}}>
           <Text style={modalStyles.white}> Last Week</Text>
         </Pressable>
-        <Pressable style={modalStyles.button}>
+        <Pressable style={modalStyles.button} onPress={() => {hide()}}>
           <Text style={modalStyles.white}>Month to date</Text>
         </Pressable>
-        <Pressable style={modalStyles.button}>
+        <Pressable style={modalStyles.button} onPress={() => {hide()}}>
           <Text style={modalStyles.white}>Last Month</Text>
         </Pressable>
-        <Pressable style={modalStyles.button}>
+        <Pressable style={modalStyles.button} onPress={() => {
+          openCRModel();
+          hide();
+        }}>
           <Text style={[modalStyles.white, modalStyles.push]}>Custom</Text>
           <FontAwesome style={modalStyles.white} name='caret-right'/>
         </Pressable>
+       </SafeAreaView>
+      </Modal>
+
+      <Modal visible={customRangePickerModelVisible} style={[modalStyles.container]} animationType='slide' onRequestClose={hide}>
+        <SafeAreaView style={[modalStyles.itemsRight, modalStyles.background, modalStyles.seperate]}>
+          <Pressable onPress={() => {
+            closeCRModel();
+            show();
+          }}>
+            <Text style={modalStyles.white}><FontAwesome name='arrow-left' size={25}/></Text>
+          </Pressable>
+          <Pressable onPress={closeCRModel}>
+            <Text style={modalStyles.white}><FontAwesome name='close' size={25}/></Text>
+          </Pressable>
+        </SafeAreaView>
+        <SafeAreaView style={[modalStyles.container, modalStyles.background]}>
+        <Text style={[modalStyles.title, modalStyles.white]}>Select a custom time range</Text>
+        
        </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -78,6 +103,10 @@ export default function entriesScreen() {
 }
 
 const modalStyles = StyleSheet.create({
+  seperate: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   push: {
     marginRight: 'auto',
   },
