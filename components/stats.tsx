@@ -10,15 +10,15 @@ export default function Stats() {
     <View style={[styles.row, styles.background]}>
       <View style={[styles.statBox, styles.background]}>
         <Text style={[styles.stat]}>2000</Text>
-        <Text>iPad pro</Text>
+        <Text style={styles.wrap}>iPad pro</Text>
       </View>
       <View style={[styles.statBox, styles.background]}>
         <Text style={[styles.stat]}>2000</Text>
-        <Text>iPhone 14 Pro max</Text>
+        <Text style={styles.wrap}>iPhone 14 Pro max</Text>
       </View>
       <View style={[styles.statBox, styles.background]}>
         <Text style={[styles.stat]}>2000</Text>
-        <Text>Chrome</Text>
+        <Text style={styles.wrap}>Chrome</Text>
       </View>
     </View>
   );
@@ -26,20 +26,26 @@ export default function Stats() {
 
 const styles = StyleSheet.create({
   background: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#151515',
   },
   row: {
     padding: 5,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
+    flexShrink: 1,
   },
   stat: {
-    marginBottom: 2,
+    marginBottom: 5,
+    fontSize: 14,
+    alignContent: 'center',
+  },
+  wrap: {
+    flexWrap: 'wrap',
   },
   statBox: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingLeft: 5,
-    paddingRight: 5,
+    maxWidth: 100,
+    flexShrink: 2,
   }
 });

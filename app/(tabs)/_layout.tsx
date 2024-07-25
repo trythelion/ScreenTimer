@@ -23,14 +23,13 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
+        
         headerShown: useClientOnlyValue(false, true),
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Entries',
+          title: 'Screen Time Logs',
           tabBarIcon: ({ color }) => <AntDesign name="home" size={24} color="white" />,
           headerRight: () => (
             <Link href="/settings" asChild>
@@ -51,7 +50,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="analytics"
         options={{
-          title: 'Analytics',
+          title: 'Overall Analytics',
           tabBarIcon: ({ color }) => <AntDesign name="linechart" size={24} color="white" />,
           headerRight: () => (
             <Link href="/settings" asChild>
