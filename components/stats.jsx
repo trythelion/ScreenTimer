@@ -1,25 +1,21 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-
 import { Text, View } from './Themed';
-
 import Colors from '@/constants/Colors';
+import { dataPool } from '@/assets/datapool';
 
-export default function Stats() {
+export default function Stats({ devices }) {
+  const sampleData = dataPool()[0];
+  const deviceList = (devices !== null) ? devices : sampleData.devices;
+
   return (
     <View style={[styles.row, styles.background]}>
-      <View style={[styles.statBox, styles.background]}>
-        <Text style={[styles.stat]}>2000</Text>
-        <Text style={styles.wrap}>iPad pro</Text>
-      </View>
-      <View style={[styles.statBox, styles.background]}>
-        <Text style={[styles.stat]}>2000</Text>
-        <Text style={styles.wrap}>iPhone 14 Pro max</Text>
-      </View>
-      <View style={[styles.statBox, styles.background]}>
-        <Text style={[styles.stat]}>2000</Text>
-        <Text style={styles.wrap}>Chrome</Text>
-      </View>
+      {deviceList.map((device, index) => (
+        <View key={index} style={[styles.statBox, styles.background]}>
+          <Text style={[styles.stat]}>{device.hoursUsed} hours</Text>
+          <Text style={styles.wrap}>{device.deviceName}</Text>
+        </View>
+      ))}
     </View>
   );
 }

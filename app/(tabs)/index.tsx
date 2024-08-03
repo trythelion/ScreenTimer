@@ -1,108 +1,108 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ScrollView, Text, Pressable, TextInput, SafeAreaView, Modal, Alert } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import Stats from '../../components/stats';
-import { Link } from 'expo-router';
+import { dataPool } from '@/assets/datapool'; // Import your data source
 
 export default function EntriesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [customRangePickerModelVisible, setCRMVisible] = useState(false);
-  const [search, saveSearchText] = useState('');
+  const [search, setSearch] = useState('');
   const [selectedOption, setSelectedOption] = useState('This week');
+  const [chartData, setChartData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const dp = dataPool();
+  const [selectedEntry, setSelectedEntry] = useState(dp[dp.length - 1]);
 
   const show = () => setModalVisible(true);
   const hide = () => setModalVisible(false);
   const openCRModel = () => setCRMVisible(true);
   const closeCRModel = () => setCRMVisible(false);
 
-  function changeTextHandler(text: string) {
-    saveSearchText(text);
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await dataPool();
+      setChartData(data);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (search) {
+      const searchTerms = search.toLowerCase().split(' ');
+      const filtered = chartData.filter(item => {
+        const startDate = item.startDate.toLowerCase();
+        const endDate = item.endDate.toLowerCase();
+        const totalHours = item.totalHours.toString();
+
+        return searchTerms.every(term =>
+          startDate.includes(term) ||
+          endDate.includes(term) ||
+          totalHours.includes(term)
+        );
+      });
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(chartData);
+    }
+  }, [search, chartData]);
+
+  function changeTextHandler(text) {
+    setSearch(text);
   }
 
-  function handleOptionSelect(option: string) {
+  function handleOptionSelect(option) {
     setSelectedOption(option);
     hide();
   }
 
+  function handleRowPress(item) {
+    setSelectedEntry(item);
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      <ScrollView>
-        <View style={styles.searchBox}>
-          <TextInput
-            style={styles.searchField}
-            placeholder="Search"
-            placeholderTextColor="#aaa"
-            onChangeText={changeTextHandler}
-            inputMode='search'
-          />
-          <Pressable
-            onPress={() => {
-              if (search) {
-                Alert.alert("Search query", `The searched query was: ${search}`);
-              }
-            }}
-          >
-            <FontAwesome name="search" size={24} color="#fff" />
-          </Pressable>
-        </View>
-        <View style={styles.dropdownContainer}>
-          <Pressable style={styles.dropdownButton} onPress={show}>
-            <Text style={styles.dropdownText}>{selectedOption}</Text>
-            <FontAwesome name="caret-down" size={20} color="#fff" />
-          </Pressable>
-        </View>
-        <Stats />
-        <Text style={styles.header}>Days</Text>
-        <ScrollView style={styles.table}>
-          {["July 1, 2024", "July 1, 2024", "July 1, 2024", "July 1, 2024"].map((date, index) => (
-            <Pressable key={index} style={styles.tableRow} onPress={() => { /* Navigate to details page */ }}>
-              <Text style={styles.tableText}>{date}</Text>
-              <Text style={styles.tableText}>30%</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-        <Modal visible={modalVisible} animationType="slide" onRequestClose={hide}>
-          <SafeAreaView style={modalStyles.modalContainer}>
-            <Pressable onPress={hide}>
-              <FontAwesome name="close" size={25} color="#fff" />
-            </Pressable>
-            <Text style={modalStyles.title}>Select a time range</Text>
-            {["This week", "Last week", "Month to date", "Last month"].map((range) => (
-              <Pressable key={range} style={modalStyles.button} onPress={() => handleOptionSelect(range)}>
-                <Text style={modalStyles.buttonText}>{range}</Text>
+      <Text style={styles.header}>{selectedEntry.startDate.replaceAll("-", " ")} to {selectedEntry.endDate.replaceAll("-", " ")}</Text>
+
+      <Stats devices={selectedEntry.devices} />
+      <View style={styles.separator}></View>
+      <Text style={styles.header}>Weeks logged</Text>
+      <View style={styles.searchBox}>
+        <TextInput
+          style={styles.searchField}
+          placeholder="Search"
+          placeholderTextColor="#aaa"
+          onChangeText={changeTextHandler}
+          inputMode='search'
+        />
+        <Pressable
+          onPress={() => {
+            if (search) {
+              Alert.alert("Search query", `The searched query was: ${search}`);
+            }
+          }}>
+          <FontAwesome name="search" size={24} color="#fff" />
+        </Pressable>
+      </View>
+      <ScrollView style={styles.table}>
+        {filteredData.length > 0 ? (
+          <>
+            <View style={styles.tableRow}>
+              <Text style={[styles.title]}>Day range</Text>
+              <Text style={styles.title}>Total Screen Time</Text>
+            </View>
+            {filteredData.map((item, index) => (
+              <Pressable key={index} style={styles.tableRow} onPress={() => handleRowPress(item)}>
+                <Text style={styles.tableText}>{item.startDate.replaceAll("-", " ")} to {item.endDate.replaceAll("-", " ")}</Text>
+                <Text style={styles.tableText}>{item.totalHours} h</Text>
               </Pressable>
             ))}
-            <Pressable
-              style={[modalStyles.button, modalStyles.customButton]}
-              onPress={() => {
-                openCRModel();
-                hide();
-              }}
-            >
-              <Text style={modalStyles.buttonText}>Custom</Text>
-              <FontAwesome name="caret-right" size={20} color="#fff" />
-            </Pressable>
-          </SafeAreaView>
-        </Modal>
-
-        <Modal visible={customRangePickerModelVisible} animationType="slide" onRequestClose={closeCRModel}>
-          <SafeAreaView style={modalStyles.modalContainer}>
-            <View style={modalStyles.customRangeHeader}>
-              <Pressable onPress={() => {
-                closeCRModel();
-                show();
-              }}>
-                <FontAwesome name="arrow-left" size={25} color="#fff" />
-              </Pressable>
-              <Pressable onPress={closeCRModel}>
-                <FontAwesome name="close" size={25} color="#fff" />
-              </Pressable>
-            </View>
-            <Text style={modalStyles.title}>Select a custom time range</Text>
-          </SafeAreaView>
-        </Modal>
+          </>
+        ) : (
+          <Text style={styles.tableText}>No data available</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -114,7 +114,6 @@ const modalStyles = StyleSheet.create({
     backgroundColor: '#1E1E1E',
     padding: 30,
     alignContent: 'center',
-    paddingRight: 20,
   },
   title: {
     fontSize: 20,
@@ -136,8 +135,6 @@ const modalStyles = StyleSheet.create({
     borderRadius: 10,
     width: '100%',
     marginBottom: 5,
-    marginLeft: 10,
-    
   },
   customButton: {
     flexDirection: 'row',
@@ -214,5 +211,16 @@ const styles = StyleSheet.create({
   tableText: {
     color: '#fff',
     fontSize: 16,
+  },
+  title: {
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 1,
+    width: '100%',
+    marginVertical: 20,
+    alignSelf: 'center',
   },
 });
