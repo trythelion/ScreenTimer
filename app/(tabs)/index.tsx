@@ -86,20 +86,20 @@ export default function EntriesScreen() {
           <FontAwesome name="search" size={24} color="#fff" />
         </Pressable>
       </View>
+      <View style={[styles.tableRow, styles.tableHeader]}>
+        <Text style={[styles.title]}>Day range</Text>
+        <Text style={styles.title}>Total Screen Time</Text>
+      </View>
       <ScrollView style={styles.table}>
         {filteredData.length > 0 ? (
-          <>
-            <View style={styles.tableRow}>
-              <Text style={[styles.title]}>Day range</Text>
-              <Text style={styles.title}>Total Screen Time</Text>
-            </View>
+          <View>
             {filteredData.map((item, index) => (
               <Pressable key={index} style={styles.tableRow} onPress={() => handleRowPress(item)}>
                 <Text style={styles.tableText}>{item.startDate.replaceAll("-", " ")} to {item.endDate.replaceAll("-", " ")}</Text>
                 <Text style={styles.tableText}>{item.totalHours} h</Text>
               </Pressable>
             ))}
-          </>
+          </View>
         ) : (
           <Text style={styles.tableText}>No data available</Text>
         )}
@@ -196,9 +196,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
+  tableHeader: {
+    backgroundColor: '#434343',
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
   table: {
     backgroundColor: '#434343',
-    borderRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     padding: 10,
   },
   tableRow: {
